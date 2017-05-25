@@ -106,6 +106,7 @@
     <ClCompile Include="D:\Downloads\2d Car Racing Game.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="agent.cpp" />
+    <ClCompile Include="coin.cpp" />
     <ClCompile Include="truck.cpp" />
   </ItemGroup>
   <ItemGroup>

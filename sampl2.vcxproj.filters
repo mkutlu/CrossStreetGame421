@@ -30,6 +30,9 @@
     <ClCompile Include="D:\Downloads\2d Car Racing Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="coin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Angel.h">
