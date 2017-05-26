@@ -3,21 +3,20 @@ class coin {
 public:
 	int coinx;
 	int coiny;
-	int coinSizex =  5 + (rand() % (int)(20 - 5 + 1));
-	void setCoinx(int x);
-	int getCoinx();
-	void setCoiny(int x);
-	int getCoiny();
+	int coinSizex = 5 + (rand() % (int)(20 - 5 + 1));
 	void setCoinx(int x) {
 		coinx = x;
 	}
-	void setCoiny(int x) {
-		coiny = x;
+	void setCoiny(int y) {
+		coiny = y;
+	}
+	int getCoiny() {
+		return coiny;
 	}
 	int getCoinx() {
 		return coinx;
 	}
-	int getCoiny() {
-		return coiny;
+	int getCoinSize() {
+		return coinSizex;
 	}
 };
