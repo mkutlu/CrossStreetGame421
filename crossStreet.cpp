@@ -1,8 +1,11 @@
-#include<glut.h>
-#include<iostream>//for strlen
-#include<stdlib.h>
+#include <gl/glut.h>
+#include <iostream>//for strlen
+#include <stdlib.h>
 #include <random>
 #include <math.h>
+#include <string>
+#include <sstream>
+using namespace std;
  
 int i,q;
 int score = 0;//for score counting
@@ -10,6 +13,7 @@ int screen = 0;
 bool collide = false;//check if car collide to make game over
 char buffer[10];
 int coin_number = 0;
+int counter = 0;
 
 int vehicleX = 200, vehicleY = 70;   
 int ovehicleX[4], ovehicleY[4];
@@ -18,12 +22,11 @@ int divx = 250, divy = 4, movd;
 float agentX = 250;
 float agentY = 0;
 bool agentBack = false;
-
 class coin {
 public:
 	int coinx;
 	int coiny;
-	int coinSizex = 5 + (rand() % (int)(20 - 5 + 1));
+	int coinSizex = 10 + (rand() % (int)(15 - 5 + 1));
 	void setCoinx(int x) {
 		coinx = x;
 	}
@@ -40,6 +43,15 @@ public:
 		return coinSizex;
 	}
 };
+coin* coin_list;
+
+class car {
+	public:
+		int carx;
+		int cary;
+};
+car* car_list;
+
 void drawText(char ch[],int xpos, int ypos)//draw the text for score and game over
 {
     int numofchar = strlen(ch);
@@ -103,61 +115,9 @@ void drawRoad()
 		glVertex2f(1.0 , 0.8);
     glEnd();
 }
+
  
- 
-void drawDivider()//black patch drawn in middle of road
-{
-    glLoadIdentity();
-    glTranslatef(0, movd, 0);
-    for(i = 1; i <= 10; i++)
-    {
-    glColor3f(0, 0, 0);
-    glBegin(GL_QUADS);
-        glVertex2f(divx  - 5, divy * 15 * i + 18);
-        glVertex2f(divx  - 5, divy * 15 * i - 18);
-        glVertex2f(divx  + 5, divy * 15 * i - 18);
-        glVertex2f(divx  + 5, divy * 15 * i + 18);
-    glEnd();
-    }
-    glLoadIdentity();
-}
-     
- 
-void drawVehicle()//car for racing
-{
-    glPointSize(10.0);
-    glBegin(GL_POINTS);//tire
-        glColor3f(0,0,0);                     
-        glVertex2f(vehicleX - 25, vehicleY + 16); 
-        glVertex2f(vehicleX + 25, vehicleY + 16); 
-        glVertex2f(vehicleX - 25, vehicleY - 16); 
-        glVertex2f(vehicleX + 25, vehicleY - 16);
-    glEnd();
-     
-    glBegin(GL_QUADS);  
-        glColor3f(1,0,0);//middle body
-        glVertex2f(vehicleX - 25, vehicleY + 20);
-        glVertex2f(vehicleX - 25, vehicleY - 20);
-        glVertex2f(vehicleX + 25, vehicleY - 20);
-        glVertex2f(vehicleX + 25, vehicleY + 20);
-    glEnd();
- 
-    glBegin(GL_QUADS);//up body
-        glColor3f(0,0,1);
-        glVertex2f(vehicleX - 23, vehicleY + 20);
-        glVertex2f(vehicleX - 19, vehicleY + 40);
-        glVertex2f(vehicleX + 19, vehicleY + 40);
-        glVertex2f(vehicleX + 23, vehicleY + 20);
-    glEnd();
- 
-    glBegin(GL_QUADS);//down body
-        glColor3f(0,0,1);
-        glVertex2f(vehicleX - 23, vehicleY - 20);
-        glVertex2f(vehicleX - 19, vehicleY - 35);
-        glVertex2f(vehicleX + 19, vehicleY - 35);
-        glVertex2f(vehicleX + 23, vehicleY - 20);
-    glEnd();
- } 
+
   
 void drawOVehicle()//other cars
 {
@@ -302,8 +262,6 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     drawRoad(); 
-    drawDivider();
-    drawVehicle();
     drawOVehicle();
     movd = movd - 16;
     if(movd < - 60)
@@ -354,11 +312,11 @@ void drawCoin(coin liste[]) {
 		GLfloat twicePi = 2.0f * 3.1415;
 
 		glBegin(GL_TRIANGLE_FAN);
-		glVertex2f(liste[m].getCoinx(), liste[m].getCoiny()); // center of circle
+		glVertex2f(coin_list[m].getCoinx(), coin_list[m].getCoiny()); // center of circle
 		for (i = 0; i <= triangleAmount; i++) {
 			glVertex2f(
-				liste[m].coinx + (liste[m].getCoinSize() * cos(i *  twicePi / triangleAmount)),
-				liste[m].coiny + (liste[m].getCoinSize() * sin(i * twicePi / triangleAmount))
+				liste[m].coinx + (coin_list[m].getCoinSize() * cos(i *  twicePi / triangleAmount)),
+				coin_list[m].coiny + (coin_list[m].getCoinSize() * sin(i * twicePi / triangleAmount))
 			);
 		}
 		glEnd();
@@ -383,25 +341,30 @@ void drawAgent() {
 	}
 }
 coin* updateCoin() {
-	coin coin_list[10];
-	int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
-	glColor3f(0.85, 0.85, 0.10);
-	coin yeni;
-	yeni.setCoinx(roads[0 + (rand() % (int)(17 - 0 + 1))]);
-	yeni.setCoiny(0 + (rand() % (int)(500 - 0 + 1)));
-	coin_list[0 + (rand() % (int)(10 - 0 + 1))] = yeni;
+	coin_list = new coin[10];
+	for (int i = 0; i <= 10; i++) {
+	
+	}
+	for (int m = 0; m < 10; m++) {
+		int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
+		coin yeni;
+		yeni.setCoinx(0 + (rand() % (int)(500 - 0 + 1)));
+		yeni.setCoiny(roads[0 + (rand() % (int)(17 - 0 + 1))]+12.5);
+		cout << yeni.coinx;
+
+
+		coin_list[m] = yeni;
+	}
 	return coin_list;
 }
 void drawCoin() {
-	coin* coin_list;
-	 coin_list=updateCoin();
 	for (int m = 0; m < 10; m++) {
 		int i;
 		int triangleAmount = 20;
 		GLfloat twicePi = 2.0f * 3.1415;
-
+		glColor3f(0.85, 0.85, 0.10);
 		glBegin(GL_TRIANGLE_FAN);
-		glVertex2f(coin_list[m].getCoinx(), coin_list[m].getCoiny()); // center of circle
+		glVertex2f(coin_list[m].coinx, coin_list[m].coiny); // center of circle
 		for (i = 0; i <= triangleAmount; i++) {
 			glVertex2f(
 				coin_list[m].coinx + (coin_list[m].getCoinSize() * cos(i *  twicePi / triangleAmount)),
@@ -411,8 +374,76 @@ void drawCoin() {
 		glEnd();
 	}
 }
+void drawVehicle() {
+	float carx = 28;
+	float cary = 28;
+	glColor3f(0.75, 0.75, 0.75);
+	glBegin(GL_QUADS);
+		glVertex2f(carx,cary);
+		glVertex2f(carx, cary+9);
+		glVertex2f(carx+12, cary+12);
+		glVertex2f(carx+12, cary);
+	glEnd();
+	glBegin(GL_QUADS);
+		glVertex2f(carx + 12, cary);
+		glVertex2f(carx + 12, cary + 12);
+		glVertex2f(carx + 30, cary + 12);
+		glVertex2f(carx + 30, cary);
+	glEnd();
+	glBegin(GL_QUADS);
+		glVertex2f(carx + 30, cary);
+		glVertex2f(carx + 30, cary + 12);
+		glVertex2f(carx + 42, cary + 9);
+		glVertex2f(carx + 42, cary);
+	glEnd();
+	glBegin(GL_QUADS);
+
+	glVertex2f(carx + 12, cary + 9);
+	glVertex2f(carx + 12, cary + 18);
+	glVertex2f(carx + 30, cary + 18);
+	glVertex2f(carx + 30, cary + 9);
+
+	glEnd();
+	int i;
+	int triangleAmount = 20;
+	GLfloat twicePi = 2.0f * 3.1415;
+	glColor3f(0, 0, 0);
+	glBegin(GL_TRIANGLE_FAN); 
+	glVertex2f(carx+12, cary); // center of circle
+	for (i = 0; i <= triangleAmount; i++) {
+		glVertex2f(
+			carx + 12 + (3 * cos(i *  twicePi / triangleAmount)),
+			cary + (3 * sin(i * twicePi / triangleAmount))
+		);
+	}
+	glEnd();
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(carx+30, cary); // center of circle
+	glVertex2f(carx + 12, cary); // center of circle
+	for (i = 0; i <= triangleAmount; i++) {
+		glVertex2f(
+			carx + 30 + (3 * cos(i *  twicePi / triangleAmount)),
+			cary + (3 * sin(i * twicePi / triangleAmount))
+		);
+	}
+	glEnd();
+}
+void updateVehicles() {
+
+}
 void myTimer(int value) {
-	drawCoin();
+	updateCoin();
+	cout << "lol";
+	glutTimerFunc(20000, myTimer, 1);
+}
+void coinInit() {
+	if (counter != 0) {
+
+	}
+	else {
+		updateCoin();
+		counter++;
+	}
 }
 void myDisplay() {
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -438,11 +469,12 @@ void myDisplay() {
 	drawRoadSpecs(525);
 	drawRoadSpecs(550);
 	drawAgent();
-	//updateCoin(1);
-	glColor3f(1, 1, 1);
-	drawText("Score:", 360, 455);
+	drawCoin();
+	drawVehicle();
+	glColor3f(1, 0, 1);
+	drawText("Score:", 360, 575);
 	itoa(score, buffer, 10);
-	drawTextNum(buffer, 6, 420, 455);
+	drawTextNum(buffer, 6, 420, 575);
 	glutSwapBuffers();
 	glFlush();
 }
@@ -461,10 +493,11 @@ void main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
     glutInitWindowPosition(100,100);
     glutInitWindowSize(500,600);
-    glutCreateWindow("LOL");
+    glutCreateWindow("Legend of Street");
 	glClearColor(1.0, 1.0, 1.0, 1.0);
+	coinInit();
     init();
-	glutTimerFunc(5,myTimer,0);
+	glutTimerFunc(20000,myTimer,1);
     glutDisplayFunc(myDisplay);
 	glutSpecialFunc(Specialkey);
     glutIdleFunc(myDisplay);
