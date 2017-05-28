@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string>
 #include <sstream>
+#include <vector>  
 using namespace std;
  
 int i,q;
@@ -14,6 +15,13 @@ bool collide = false;//check if car collide to make game over
 char buffer[10];
 int coin_number = 0;
 int counter = 0;
+
+bool roadway[18] { true,true,false,false,true,false,false,true,true,false,false,true,false,true,false,true,false,true }; //true>right false>left 
+int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
+
+std::vector<int> allCarsx;
+std::vector<int> allCarsy;
+std::vector<int> allTrucks;
 
 int vehicleX = 200, vehicleY = 70;   
 int ovehicleX[4], ovehicleY[4];
@@ -26,7 +34,7 @@ class coin {
 public:
 	int coinx;
 	int coiny;
-	int coinSizex = 10 + (rand() % (int)(15 - 5 + 1));
+	int coinSizex = 10 + (rand() % (int)(10 - 5 + 1));
 	void setCoinx(int x) {
 		coinx = x;
 	}
@@ -62,9 +70,7 @@ void drawText(char ch[],int xpos, int ypos)//draw the text for score and game ov
      
     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, ch[i]);//font used here, may use other font also
     }
-}
- 
- 
+} 
 void drawTextNum(char ch[],int numtext,int xpos, int ypos)//counting the score
 {
     int len;
@@ -83,99 +89,6 @@ void drawTextNum(char ch[],int numtext,int xpos, int ypos)//counting the score
         k++;
     }
      
-    }
-}
- 
- 
-void ovpos()
-{
-    glClearColor(0,0,1,0);
-for(i = 0; i < 4; i++)
-{
-    if(rand() % 2 == 0)
-    {
-        ovehicleX[i] = 200;
-    }
-    else
-    {
-        ovehicleX[i] = 300;
-    }  
-    ovehicleY[i] = 1000 - i * 160;
-}
-}
- /*Draw update */
- 
-void drawRoad()
-{
-    glBegin(GL_LINES); 
-        glColor3f(0.5,0.5,0.5);
-		glVertex2f(-1.0, 1.0);
-        glVertex2f(-0.8, 1.0);
-        glVertex2f(1.0, 1.0);
-		glVertex2f(1.0 , 0.8);
-    glEnd();
-}
-
- 
-
-  
-void drawOVehicle()//other cars
-{
-     
-    for(i = 0; i < 4; i++)
-    {
-    glPointSize(10.0);
-    glBegin(GL_POINTS);//tire
-        glColor3f(0,0,0);                     
-        glVertex2f(ovehicleX[i] - 25, ovehicleY[i] + 16); 
-        glVertex2f(ovehicleX[i] + 25, ovehicleY[i] + 16); 
-        glVertex2f(ovehicleX[i] - 25, ovehicleY[i] - 16); 
-        glVertex2f(ovehicleX[i] + 25, ovehicleY[i] - 16);
-    glEnd();
-     
-    glBegin(GL_QUADS);  
-        glColor3f(0.99609, 0.83984, 0);//middle body
-        glVertex2f(ovehicleX[i] - 25, ovehicleY[i] + 20);
-        glVertex2f(ovehicleX[i] - 25, ovehicleY[i] - 20);
-        glVertex2f(ovehicleX[i] + 25, ovehicleY[i] - 20);
-        glVertex2f(ovehicleX[i] + 25, ovehicleY[i] + 20);
-    glEnd();
- 
-    glBegin(GL_QUADS);//up body
-        glColor3f(0,1,0);
-        glVertex2f(ovehicleX[i] - 23, ovehicleY[i] + 20);
-        glVertex2f(ovehicleX[i] - 19, ovehicleY[i] + 40);
-        glVertex2f(ovehicleX[i] + 19, ovehicleY[i] + 40);
-        glVertex2f(ovehicleX[i] + 23, ovehicleY[i] + 20);
-    glEnd();
- 
-    glBegin(GL_QUADS);//down body
-        glColor3f(0,1,0);
-        glVertex2f(ovehicleX[i] - 23, ovehicleY[i] - 20);
-        glVertex2f(ovehicleX[i] - 19, ovehicleY[i] - 35);
-        glVertex2f(ovehicleX[i] + 19, ovehicleY[i] - 35);
-        glVertex2f(ovehicleX[i] + 23, ovehicleY[i] - 20);
-    glEnd();
-     
-    ovehicleY[i] = ovehicleY[i] - 8; 
-     
-    if(ovehicleY[i] > vehicleY - 25 - 25 && ovehicleY[i] < vehicleY + 25 + 25 && ovehicleX[i] == vehicleX)
-    {
-        collide = true;
-    }
-     
-    if(ovehicleY[i] < -25)
-    { 
-        if(rand() % 2 == 0)
-        {
-            ovehicleX[i] = 200;
-        }
-        else
-        {
-            ovehicleX[i] = 300;
-        }
-        ovehicleY[i] = 600; 
-    } 
     }
 }
 void updateAgent(int x, int y) {
@@ -256,19 +169,9 @@ void Specialkey(int key, int x, int y)//allow to use navigation key for movement
 			}
 		glutPostRedisplay();
 }
-
- 
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    drawRoad(); 
-    drawOVehicle();
-    movd = movd - 16;
-    if(movd < - 60)
-    {
-        movd = 0;
-    }
-     
     score = score + 1;
     glColor3f(1,1,1);
     drawText("Score:", 360,455);
@@ -375,61 +278,159 @@ void drawCoin() {
 	}
 }
 void drawVehicle() {
-	float carx = 28;
-	float cary = 28;
-	glColor3f(0.75, 0.75, 0.75);
-	glBegin(GL_QUADS);
-		glVertex2f(carx,cary);
-		glVertex2f(carx, cary+9);
-		glVertex2f(carx+12, cary+12);
-		glVertex2f(carx+12, cary);
-	glEnd();
-	glBegin(GL_QUADS);
+	float carx ;
+	float cary ;
+	int num = allCarsy.size();
+	for (int m = 0; i < num; m++) {
+		carx = allCarsx.at(m);
+		cary = allCarsy.at(m);
+		glColor3f(0.75, 0.75, 0.75);
+
+		glBegin(GL_QUADS);
+		glVertex2f(carx, cary);
+		glVertex2f(carx, cary + 9);
+		glVertex2f(carx + 12, cary + 12);
+		glVertex2f(carx + 12, cary);
+		glEnd();
+		glBegin(GL_QUADS);
 		glVertex2f(carx + 12, cary);
 		glVertex2f(carx + 12, cary + 12);
 		glVertex2f(carx + 30, cary + 12);
 		glVertex2f(carx + 30, cary);
-	glEnd();
-	glBegin(GL_QUADS);
+		glEnd();
+		glBegin(GL_QUADS);
 		glVertex2f(carx + 30, cary);
 		glVertex2f(carx + 30, cary + 12);
 		glVertex2f(carx + 42, cary + 9);
 		glVertex2f(carx + 42, cary);
+		glEnd();
+		glBegin(GL_QUADS);
+
+		glVertex2f(carx + 12, cary + 9);
+		glVertex2f(carx + 12, cary + 20);
+		glVertex2f(carx + 30, cary + 20);
+		glVertex2f(carx + 30, cary + 9);
+
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex2f(carx + 9, cary + 9);
+		glVertex2f(carx + 12, cary + 18);
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex2f(carx + 33, cary + 9);
+		glVertex2f(carx + 30, cary + 18);
+		glEnd();
+
+		glColor3f(1, 1, 1);
+		glBegin(GL_QUADS);
+
+		glVertex2f(carx + 14, cary + 11);
+		glVertex2f(carx + 14, cary + 18);
+		glVertex2f(carx + 28, cary + 18);
+		glVertex2f(carx + 28, cary + 11);
+
+		glEnd();
+		int i;
+		int triangleAmount = 20;
+		GLfloat twicePi = 2.0f * 3.1415;
+		glColor3f(0, 0, 0);
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(carx + 12, cary); // center of circle
+		for (i = 0; i <= triangleAmount; i++) {
+			glVertex2f(
+				carx + 12 + (3 * cos(i *  twicePi / triangleAmount)),
+				cary + (3 * sin(i * twicePi / triangleAmount))
+			);
+		}
+		glEnd();
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(carx + 30, cary); // center of circle
+		glVertex2f(carx + 12, cary); // center of circle
+		for (i = 0; i <= triangleAmount; i++) {
+			glVertex2f(
+				carx + 30 + (3 * cos(i *  twicePi / triangleAmount)),
+				cary + (3 * sin(i * twicePi / triangleAmount))
+			);
+		}
+		glEnd();
+	}
+
+	
+}
+void drawTruck() {
+
+	float truckx = 128;
+	float trucky = 128;
+	glColor3f(0.545, 0.271, 0.075);
+	glBegin(GL_QUADS);
+		glVertex2f(truckx, trucky);
+		glVertex2f(truckx, trucky + 20);
+		glVertex2f(truckx + 44, trucky + 20);
+		glVertex2f(truckx + 44, trucky);
 	glEnd();
 	glBegin(GL_QUADS);
-
-	glVertex2f(carx + 12, cary + 9);
-	glVertex2f(carx + 12, cary + 18);
-	glVertex2f(carx + 30, cary + 18);
-	glVertex2f(carx + 30, cary + 9);
-
+	glVertex2f(truckx + 45, trucky);
+	glVertex2f(truckx + 45 ,trucky + 17);
+	glVertex2f(truckx + 62, trucky + 17);
+	glVertex2f(truckx + 62, trucky);
 	glEnd();
 	int i;
 	int triangleAmount = 20;
 	GLfloat twicePi = 2.0f * 3.1415;
 	glColor3f(0, 0, 0);
-	glBegin(GL_TRIANGLE_FAN); 
-	glVertex2f(carx+12, cary); // center of circle
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(truckx + 8, trucky); // center of circle
 	for (i = 0; i <= triangleAmount; i++) {
 		glVertex2f(
-			carx + 12 + (3 * cos(i *  twicePi / triangleAmount)),
-			cary + (3 * sin(i * twicePi / triangleAmount))
+			truckx + 8 + (3 * cos(i *  twicePi / triangleAmount)),
+			trucky + (3 * sin(i * twicePi / triangleAmount))
+		);
+	}
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(truckx + 15, trucky); // center of circle
+	for (i = 0; i <= triangleAmount; i++) {
+		glVertex2f(
+			truckx + 15 + (3 * cos(i *  twicePi / triangleAmount)),
+			trucky + (3 * sin(i * twicePi / triangleAmount))
 		);
 	}
 	glEnd();
 	glBegin(GL_TRIANGLE_FAN);
-	glVertex2f(carx+30, cary); // center of circle
-	glVertex2f(carx + 12, cary); // center of circle
+	glVertex2f(truckx + 45, trucky); // center of circle
 	for (i = 0; i <= triangleAmount; i++) {
 		glVertex2f(
-			carx + 30 + (3 * cos(i *  twicePi / triangleAmount)),
-			cary + (3 * sin(i * twicePi / triangleAmount))
+			truckx + 45 + (3 * cos(i *  twicePi / triangleAmount)),
+			trucky + (3 * sin(i * twicePi / triangleAmount))
 		);
 	}
 	glEnd();
 }
-void updateVehicles() {
-
+void createCar(int x, int y) {
+	allCarsy.push_back(y);
+	allCarsx.push_back(x);
+}
+void updateVehicles(int i) {
+	cout << "deneme";
+	int carNum = 0;
+	for (int i = 0; i < 18; i++) {
+		int number = allCarsy.size();
+		for (int m = 0; m < number; m++) {
+			cout << "1";
+			if (allCarsy.at(m) == roads[i])
+				carNum++;
+		}
+		if (carNum <= 2) {
+			createCar(-20, roads[i]);
+		}
+		cout << "2";
+	}
+	auto it = allCarsx.begin();
+	int num = allCarsy.size();
+	for (int i = 0; i < num; i++) {
+		allCarsx.insert(it +i, allCarsx.at(i) + 5);
+	}
+	cout << "lul";
+	glutTimerFunc(10000, updateVehicles, 1);
 }
 void myTimer(int value) {
 	updateCoin();
@@ -471,6 +472,7 @@ void myDisplay() {
 	drawAgent();
 	drawCoin();
 	drawVehicle();
+	drawTruck();
 	glColor3f(1, 0, 1);
 	drawText("Score:", 360, 575);
 	itoa(score, buffer, 10);
@@ -498,6 +500,7 @@ void main(int argc, char **argv)
 	coinInit();
     init();
 	glutTimerFunc(20000,myTimer,1);
+	glutTimerFunc(1000, updateVehicles, 1);
     glutDisplayFunc(myDisplay);
 	glutSpecialFunc(Specialkey);
     glutIdleFunc(myDisplay);
