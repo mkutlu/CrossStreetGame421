@@ -18,6 +18,7 @@ int counter = 0;
 
 bool roadway[18] { true,true,false,false,true,false,false,true,true,false,false,true,false,true,false,true,false,true }; //true>right false>left 
 int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
+int speeds[18] = { 2,4,5,10,4,3,2,7,2,7,10,9,5,3,6,4,1,2 };
 
 std::vector<int> allCarsx;
 std::vector<int> allCarsy;
@@ -281,9 +282,12 @@ void drawVehicle() {
 	float carx ;
 	float cary ;
 	int num = allCarsy.size();
-	for (int m = 0; i < num; m++) {
-		carx = allCarsx.at(m);
-		cary = allCarsy.at(m);
+
+	for (int m = 0; m< num; m++) {
+		carx = allCarsx[m];
+		cary = allCarsy[m];
+		
+		
 		glColor3f(0.75, 0.75, 0.75);
 
 		glBegin(GL_QUADS);
@@ -410,27 +414,41 @@ void createCar(int x, int y) {
 	allCarsx.push_back(x);
 }
 void updateVehicles(int i) {
-	cout << "deneme";
 	int carNum = 0;
+
 	for (int i = 0; i < 18; i++) {
-		int number = allCarsy.size();
-		for (int m = 0; m < number; m++) {
-			cout << "1";
-			if (allCarsy.at(m) == roads[i])
+		//cout << allCarsx.size();
+		//cout << " m ";
+		int length = allCarsy.size();
+		allCarsy.resize(length);
+		for (int m = 0; m < length; m++) {
+			if (roadway[m]) {
+				if (allCarsx[m] >= 500) {
+
+				}
+			}
+			if (allCarsy[m]== roads[i])
 				carNum++;
 		}
 		if (carNum <= 2) {
-			createCar(-20, roads[i]);
+			if (roadway[i]) {
+				createCar(-20, roads[i]);
+			}
+			else
+				createCar(520, roads[i]);
 		}
-		cout << "2";
 	}
+	cout << "deneme";
 	auto it = allCarsx.begin();
 	int num = allCarsy.size();
-	for (int i = 0; i < num; i++) {
-		allCarsx.insert(it +i, allCarsx.at(i) + 5);
+	for (int i = 0; i <num; i++) {
+		if(roadway[i])
+			allCarsx[i] = allCarsx[i] + speeds[i];
+		else
+			allCarsx[i] = allCarsx[i] - speeds[i];
+
 	}
-	cout << "lul";
-	glutTimerFunc(10000, updateVehicles, 1);
+	glutTimerFunc(100, updateVehicles, 1);
 }
 void myTimer(int value) {
 	updateCoin();
@@ -495,14 +513,14 @@ void main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
     glutInitWindowPosition(100,100);
     glutInitWindowSize(500,600);
-    glutCreateWindow("Legend of Street");
+    glutCreateWindow("Lol");
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	coinInit();
     init();
 	glutTimerFunc(20000,myTimer,1);
-	glutTimerFunc(1000, updateVehicles, 1);
+	glutTimerFunc(100, updateVehicles, 0);
     glutDisplayFunc(myDisplay);
 	glutSpecialFunc(Specialkey);
-    glutIdleFunc(myDisplay);
+	glutIdleFunc(myDisplay);
     glutMainLoop();
 }
