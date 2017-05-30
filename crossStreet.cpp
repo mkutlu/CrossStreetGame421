@@ -10,7 +10,7 @@ using namespace std;
  
 int i,q;
 int score = 0;//for score counting
-int screen = 0;
+int screen = 0; // 0 home screen, 1 game screen, 2 game over
 bool collide = false;//check if car collide to make game over
 char buffer[10];
 int coin_number = 0;
@@ -22,7 +22,9 @@ int speeds[18] = { 2,4,5,10,4,3,2,7,2,7,10,9,5,3,6,4,1,2 };
 
 std::vector<int> allCarsx;
 std::vector<int> allCarsy;
-std::vector<int> allTrucks;
+std::vector<int> allTrucksx;
+std::vector<int> allTrucksy;
+
 
 int vehicleX = 200, vehicleY = 70;   
 int ovehicleX[4], ovehicleY[4];
@@ -144,22 +146,34 @@ void updateAgentBack(int x, int y) {
 	if (agentY < 25)
 		agentBack = false;
 }
+void OnMouseClick(int button, int state, int x, int y) {
+	if (screen == 0) {
+		y = 600 - y;
+		cout << x;
+		cout << " ";
+		cout << y;
+		if (button == GLUT_LEFT_BUTTON & x > 200 & x < 300 & y>400 & y < 440) {
+			screen = 1;
+		}
+	}
+}
 void Specialkey(int key, int x, int y)//allow to use navigation key for movement of car
 {
-	switch(key){
+	if (screen == 1) {
+		switch (key) {
 		case GLUT_KEY_LEFT:
-			if(agentBack==false)
-				updateAgent(-20,0);
+			if (agentBack == false)
+				updateAgent(-20, 0);
 			else
 				updateAgentBack(-20, 0);
-            break;
+			break;
 		case GLUT_KEY_RIGHT:
-			if (agentBack == false) 
+			if (agentBack == false)
 				updateAgent(20, 0);
 			else
 				updateAgentBack(20, 0);
 			break;
-		case GLUT_KEY_UP: 
+		case GLUT_KEY_UP:
 			if (agentBack == false)
 				updateAgent(0, 25);
 			break;
@@ -167,8 +181,34 @@ void Specialkey(int key, int x, int y)//allow to use navigation key for movement
 			if (agentBack == true)
 				updateAgentBack(0, -25);
 			break;
-			}
+		}
 		glutPostRedisplay();
+	}
+	if (screen == 0) {
+		switch (key) {
+		case GLUT_KEY_LEFT:
+			if (agentBack == false)
+				updateAgent(-20, 0);
+			else
+				updateAgentBack(-20, 0);
+			break;
+		case GLUT_KEY_RIGHT:
+			if (agentBack == false)
+				updateAgent(20, 0);
+			else
+				updateAgentBack(20, 0);
+			break;
+		case GLUT_KEY_UP:
+			if (agentBack == false)
+				updateAgent(0, 25);
+			break;
+		case GLUT_KEY_DOWN:
+			if (agentBack == true)
+				updateAgentBack(0, -25);
+			break;
+		}
+		glutPostRedisplay();
+	}
 }
 void display()
 {
@@ -245,21 +285,26 @@ void drawAgent() {
 	}
 }
 coin* updateCoin() {
-	coin_list = new coin[10];
-	for (int i = 0; i <= 10; i++) {
-	
+	if (collide) {
+
 	}
-	for (int m = 0; m < 10; m++) {
-		int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
-		coin yeni;
-		yeni.setCoinx(0 + (rand() % (int)(500 - 0 + 1)));
-		yeni.setCoiny(roads[0 + (rand() % (int)(17 - 0 + 1))]+12.5);
-		cout << yeni.coinx;
+	else {
+		coin_list = new coin[10];
+		for (int i = 0; i <= 10; i++) {
+
+		}
+		for (int m = 0; m < 10; m++) {
+			int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
+			coin yeni;
+			yeni.setCoinx(0 + (rand() % (int)(500 - 0 + 1)));
+			yeni.setCoiny(roads[0 + (rand() % (int)(17 - 0 + 1))] + 12.5);
+			cout << yeni.coinx;
 
 
-		coin_list[m] = yeni;
+			coin_list[m] = yeni;
+		}
+		return coin_list;
 	}
-	return coin_list;
 }
 void drawCoin() {
 	for (int m = 0; m < 10; m++) {
@@ -362,93 +407,135 @@ void drawVehicle() {
 	
 }
 void drawTruck() {
+	float truckx;
+	float trucky;
+	int num = allTrucksy.size();
 
-	float truckx = 128;
-	float trucky = 128;
-	glColor3f(0.545, 0.271, 0.075);
-	glBegin(GL_QUADS);
+	for (int m = 0; m < num; m++) {
+		truckx = allTrucksx[m];
+		trucky = allTrucksy[m];
+		glColor3f(0.545, 0.271, 0.075);
+		glBegin(GL_QUADS);
 		glVertex2f(truckx, trucky);
 		glVertex2f(truckx, trucky + 20);
 		glVertex2f(truckx + 44, trucky + 20);
 		glVertex2f(truckx + 44, trucky);
-	glEnd();
-	glBegin(GL_QUADS);
-	glVertex2f(truckx + 45, trucky);
-	glVertex2f(truckx + 45 ,trucky + 17);
-	glVertex2f(truckx + 62, trucky + 17);
-	glVertex2f(truckx + 62, trucky);
-	glEnd();
-	int i;
-	int triangleAmount = 20;
-	GLfloat twicePi = 2.0f * 3.1415;
-	glColor3f(0, 0, 0);
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex2f(truckx + 8, trucky); // center of circle
-	for (i = 0; i <= triangleAmount; i++) {
-		glVertex2f(
-			truckx + 8 + (3 * cos(i *  twicePi / triangleAmount)),
-			trucky + (3 * sin(i * twicePi / triangleAmount))
-		);
+		glEnd();
+		glBegin(GL_QUADS);
+		glVertex2f(truckx + 45, trucky);
+		glVertex2f(truckx + 45, trucky + 17);
+		glVertex2f(truckx + 62, trucky + 17);
+		glVertex2f(truckx + 62, trucky);
+		glEnd();
+		int i;
+		int triangleAmount = 20;
+		GLfloat twicePi = 2.0f * 3.1415;
+		glColor3f(0, 0, 0);
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(truckx + 8, trucky); // center of circle
+		for (i = 0; i <= triangleAmount; i++) {
+			glVertex2f(
+				truckx + 8 + (3 * cos(i *  twicePi / triangleAmount)),
+				trucky + (3 * sin(i * twicePi / triangleAmount))
+			);
+		}
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(truckx + 15, trucky); // center of circle
+		for (i = 0; i <= triangleAmount; i++) {
+			glVertex2f(
+				truckx + 15 + (3 * cos(i *  twicePi / triangleAmount)),
+				trucky + (3 * sin(i * twicePi / triangleAmount))
+			);
+		}
+		glEnd();
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(truckx + 45, trucky); // center of circle
+		for (i = 0; i <= triangleAmount; i++) {
+			glVertex2f(
+				truckx + 45 + (3 * cos(i *  twicePi / triangleAmount)),
+				trucky + (3 * sin(i * twicePi / triangleAmount))
+			);
+		}
+		glEnd();
 	}
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex2f(truckx + 15, trucky); // center of circle
-	for (i = 0; i <= triangleAmount; i++) {
-		glVertex2f(
-			truckx + 15 + (3 * cos(i *  twicePi / triangleAmount)),
-			trucky + (3 * sin(i * twicePi / triangleAmount))
-		);
-	}
-	glEnd();
-	glBegin(GL_TRIANGLE_FAN);
-	glVertex2f(truckx + 45, trucky); // center of circle
-	for (i = 0; i <= triangleAmount; i++) {
-		glVertex2f(
-			truckx + 45 + (3 * cos(i *  twicePi / triangleAmount)),
-			trucky + (3 * sin(i * twicePi / triangleAmount))
-		);
-	}
-	glEnd();
 }
 void createCar(int x, int y) {
 	allCarsy.push_back(y);
 	allCarsx.push_back(x);
 }
+void createTruck(int x, int y) {
+	allTrucksy.push_back(y);
+	allTrucksx.push_back(x);
+}
 void updateVehicles(int i) {
-	int carNum = 0;
+	if (collide == true) {
 
-	for (int i = 0; i < 18; i++) {
-		//cout << allCarsx.size();
-		//cout << " m ";
-		int length = allCarsy.size();
-		allCarsy.resize(length);
-		for (int m = 0; m < length; m++) {
-			if (roadway[m]) {
-				if (allCarsx[m] >= 500) {
-
+	}
+	else {
+		int carNum = 0;
+		bool busy = false;
+		bool busyright = false;
+		for (int i = 0; i < 18; i++) {
+			//cout << allCarsx.size();
+			//cout << " m ";
+			int length = allCarsy.size();
+			allCarsy.resize(length);
+			for (int i = 0; i < length; i++) {
+				if (roadway[i] & allCarsx[i] <= 40 & allCarsx[i] >= -20)
+					busy = true;
+				else if (roadway[i] != true & allCarsx[i] >= 470 & allCarsx[i] <= 520)
+					busyright = true;
+			}
+			for (int m = 0; m < length; m++) {
+				if (roadway[m]) {
+					if (allCarsx[m] >= 500 & !busy)
+						allCarsx[m] = -20;
+				}
+				else
+					if (allCarsx[m] <= 0 & !busyright)
+						allCarsx[m] = 520;
+				if (allCarsy[m] == roads[i])
+					carNum++;
+			}
+			if (carNum <= 2) {
+				int rando = 0 + (rand() % (int)(3 - 0 + 1));
+				if (rando == 1 || rando == 2) {
+					if (roadway[i]) {
+						createCar(-20, roads[i]);
+					}
+					else
+						createCar(520, roads[i]);
+				}
+				else {
+					if (roadway[i]) {
+						createTruck(-20, roads[i]);
+					}
+					else
+						createTruck(520, roads[i]);
 				}
 			}
-			if (allCarsy[m]== roads[i])
-				carNum++;
 		}
-		if (carNum <= 2) {
-			if (roadway[i]) {
-				createCar(-20, roads[i]);
-			}
+		int num = allCarsy.size();
+		for (int i = 0; i < num; i++) {
+			if (roadway[i])
+				allCarsx[i] = allCarsx[i] + speeds[i];
 			else
-				createCar(520, roads[i]);
-		}
-	}
-	cout << "deneme";
-	auto it = allCarsx.begin();
-	int num = allCarsy.size();
-	for (int i = 0; i <num; i++) {
-		if(roadway[i])
-			allCarsx[i] = allCarsx[i] + speeds[i];
-		else
-			allCarsx[i] = allCarsx[i] - speeds[i];
+				allCarsx[i] = allCarsx[i] - speeds[i];
+			if (agentX + 12.5 >= allCarsx[i] & agentX + 12.5 <= allCarsx[i] + 42 & agentY + 12.5 >= allCarsy[i] & agentY + 12.5 <= allCarsy[i] + 20)
+				collide = true;
 
+		}
+		int num2 = allTrucksy.size();
+		for (int i = 0; i < num2; i++) {
+			if (roadway[i])
+				allTrucksx[i] = allTrucksx[i] + speeds[i];
+			else
+				allTrucksx[i] = allTrucksx[i] - speeds[i];
+			if (agentX + 12.5 >= allTrucksx[i] & agentX + 12.5 <= allTrucksx[i] + 62 & agentY + 12.5 >= allTrucksy[i] & agentY + 12.5 <= allTrucksy[i] + 20)
+				collide = true;
+		}
+		glutTimerFunc(100, updateVehicles, 1);
 	}
-	glutTimerFunc(100, updateVehicles, 1);
 }
 void myTimer(int value) {
 	updateCoin();
@@ -492,13 +579,42 @@ void myDisplay() {
 	drawVehicle();
 	drawTruck();
 	glColor3f(1, 0, 1);
+	if (collide == true) {
+		drawText("Game over! Score:", 250, 250);
+		itoa(score, buffer, 10);
+		drawTextNum(buffer, 6, 250, 220);
+	}
 	drawText("Score:", 360, 575);
 	itoa(score, buffer, 10);
 	drawTextNum(buffer, 6, 420, 575);
 	glutSwapBuffers();
 	glFlush();
 }
-
+void homeScreen() {
+	glClear(GL_COLOR_BUFFER_BIT);
+		glColor3f(0, 0, 0);
+		//drawText("Legend of Street", 200, 480);
+		glColor3f(0.75, 0.75, 0.75);
+		glBegin(GL_QUADS);
+		glVertex2f(200, 400);
+		glVertex2f(200, 440);
+		glVertex2f(300, 440);
+		glVertex2f(300, 400);
+		glEnd();
+		glColor3f(0, 0, 0);
+		drawText("EASY", 225, 412);
+		if (screen == 1) {
+			glClearColor(1.0, 1.0, 1.0, 1.0);
+			coinInit();
+			glutTimerFunc(20000, myTimer, 1);
+			glutTimerFunc(100, updateVehicles, 0);
+			glutDisplayFunc(myDisplay);
+			glutSpecialFunc(Specialkey);
+			glutIdleFunc(myDisplay);
+		}
+	glutSwapBuffers();
+	glFlush();
+}
 void init()
 {
 	glMatrixMode(GL_PROJECTION);
@@ -514,13 +630,24 @@ void main(int argc, char **argv)
     glutInitWindowPosition(100,100);
     glutInitWindowSize(500,600);
     glutCreateWindow("Lol");
+	init();
 	glClearColor(1.0, 1.0, 1.0, 1.0);
-	coinInit();
-    init();
-	glutTimerFunc(20000,myTimer,1);
-	glutTimerFunc(100, updateVehicles, 0);
-    glutDisplayFunc(myDisplay);
-	glutSpecialFunc(Specialkey);
-	glutIdleFunc(myDisplay);
+	if (screen == 0) {
+		glClearColor(0.5, 1.0, 0.5, 1);
+		glutDisplayFunc(homeScreen);
+		glutSpecialFunc(Specialkey);
+		glutMouseFunc(OnMouseClick);
+	}
+	else if (screen == 1) {
+		coinInit();
+		glutTimerFunc(20000, myTimer, 1);
+		glutTimerFunc(100, updateVehicles, 0);
+		glutDisplayFunc(myDisplay);
+		glutSpecialFunc(Specialkey);
+		glutIdleFunc(myDisplay);
+	}
+	cout << "lol";
+
+	
     glutMainLoop();
 }
