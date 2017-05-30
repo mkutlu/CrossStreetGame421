@@ -1,11 +1,14 @@
 #include <gl/glut.h>
 #include <iostream>//for strlen
 #include <stdlib.h>
+#include <GL/freeglut.h>
 #include <random>
 #include <math.h>
 #include <string>
 #include <sstream>
+#include <ctype.h>
 #include <vector>  
+#include <string>
 using namespace std;
  
 int i,q;
@@ -15,11 +18,11 @@ bool collide = false;//check if car collide to make game over
 char buffer[10];
 int coin_number = 0;
 int counter = 0;
-
+vector< string > names(1);
 bool roadway[18] { true,true,false,false,true,false,false,true,true,false,false,true,false,true,false,true,false,true }; //true>right false>left 
 int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
 int speeds[18] = { 2,4,5,10,4,3,2,7,2,7,10,9,5,3,6,4,1,2 };
-
+bool isdraw = false;
 std::vector<int> allCarsx;
 std::vector<int> allCarsy;
 std::vector<int> allTrucksx;
@@ -157,6 +160,26 @@ void OnMouseClick(int button, int state, int x, int y) {
 		}
 	}
 }
+void keyboard(unsigned char key,int x, int y) {
+	if (key == 13)
+	{
+		// enter key
+		return;
+	}
+	else if (key == 8)
+	{
+		if(names[0].size()!=0)
+			names.back().pop_back();
+	}
+	else
+	{
+		// regular text
+		if(names[0].size()<=20)
+			names.back().push_back(key);
+	}
+
+	glutPostRedisplay();
+}
 void Specialkey(int key, int x, int y)//allow to use navigation key for movement of car
 {
 	if (screen == 1) {
@@ -185,28 +208,7 @@ void Specialkey(int key, int x, int y)//allow to use navigation key for movement
 		glutPostRedisplay();
 	}
 	if (screen == 0) {
-		switch (key) {
-		case GLUT_KEY_LEFT:
-			if (agentBack == false)
-				updateAgent(-20, 0);
-			else
-				updateAgentBack(-20, 0);
-			break;
-		case GLUT_KEY_RIGHT:
-			if (agentBack == false)
-				updateAgent(20, 0);
-			else
-				updateAgentBack(20, 0);
-			break;
-		case GLUT_KEY_UP:
-			if (agentBack == false)
-				updateAgent(0, 25);
-			break;
-		case GLUT_KEY_DOWN:
-			if (agentBack == true)
-				updateAgentBack(0, -25);
-			break;
-		}
+		cout << "loll";
 		glutPostRedisplay();
 	}
 }
@@ -225,7 +227,8 @@ void display()
         glColor3f(0,0,0);
         drawText("Game Over", 200,250);
         glutSwapBuffers();
-        getchar();    }
+        getchar();   
+ }
 
 }
 void drawSafePoint(int x, int y, int z, int w) {
@@ -593,6 +596,15 @@ void myDisplay() {
 void homeScreen() {
 	glClear(GL_COLOR_BUFFER_BIT);
 		glColor3f(0, 0, 0);
+		char* ch = "Legend of Street";
+		int numofchar = strlen(ch);
+		glLoadIdentity();
+		glRasterPos2f(150, 480);
+		for (i = 0; i <= numofchar - 1; i++)
+		{
+
+			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, ch[i]);//font used here, may use other font also
+		}
 		//drawText("Legend of Street", 200, 480);
 		glColor3f(0.75, 0.75, 0.75);
 		glBegin(GL_QUADS);
@@ -601,8 +613,34 @@ void homeScreen() {
 		glVertex2f(300, 440);
 		glVertex2f(300, 400);
 		glEnd();
+		glBegin(GL_QUADS);
+		glVertex2f(200, 350);
+		glVertex2f(200, 390);
+		glVertex2f(300, 390);
+		glVertex2f(300, 350);
+		glEnd();
 		glColor3f(0, 0, 0);
 		drawText("EASY", 225, 412);
+		drawText("A bit Hard", 208, 362);
+		drawText("Enter your nickname for High Scores:", 100, 280);
+		glColor3f(1, 1, 1);
+		glBegin(GL_QUADS);
+		glVertex2f(140, 240);
+		glVertex2f(140, 270);
+		glVertex2f(370,	270);
+		glVertex2f(370, 240);
+		glEnd();
+		glColor3f(0, 0, 0);
+		for (size_t i = 0; i < names.size(); ++i)
+		{
+			ostringstream oss;
+			oss << (i + 1) << ": " << names[i];
+
+			void* font = GLUT_BITMAP_9_BY_15;
+			const int fontHeight = glutBitmapHeight(font);
+			glRasterPos2i(160, 260 - (fontHeight * (i + 1)));
+			glutBitmapString(font, (const unsigned char*)(oss.str().c_str()));
+		}
 		if (screen == 1) {
 			glClearColor(1.0, 1.0, 1.0, 1.0);
 			coinInit();
@@ -635,7 +673,7 @@ void main(int argc, char **argv)
 	if (screen == 0) {
 		glClearColor(0.5, 1.0, 0.5, 1);
 		glutDisplayFunc(homeScreen);
-		glutSpecialFunc(Specialkey);
+		glutKeyboardFunc(keyboard);
 		glutMouseFunc(OnMouseClick);
 	}
 	else if (screen == 1) {
