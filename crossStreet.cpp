@@ -15,19 +15,20 @@ int i,q;
 int score = 0;//for score counting
 int screen = 0; // 0 home screen, 1 game screen, 2 game over
 bool collide = false;//check if car collide to make game over
+bool coincollide = false;
 char buffer[10];
 int coin_number = 0;
 int counter = 0;
-vector< string > names(1);
+std::vector<string> names(1);
 bool roadway[18] { true,true,false,false,true,false,false,true,true,false,false,true,false,true,false,true,false,true }; //true>right false>left 
 int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
 int speeds[18] = { 2,4,5,10,4,3,2,7,2,7,10,9,5,3,6,4,1,2 };
 bool isdraw = false;
+
 std::vector<int> allCarsx;
 std::vector<int> allCarsy;
 std::vector<int> allTrucksx;
 std::vector<int> allTrucksy;
-
 
 int vehicleX = 200, vehicleY = 70;   
 int ovehicleX[4], ovehicleY[4];
@@ -122,6 +123,7 @@ void updateAgent(int x, int y) {
 	}
 	if (agentY > 575)
 		agentBack = true;
+
 }
 void updateAgentBack(int x, int y) {
 	if (x >= 0 && y >= 0) {
@@ -182,54 +184,57 @@ void keyboard(unsigned char key,int x, int y) {
 }
 void Specialkey(int key, int x, int y)//allow to use navigation key for movement of car
 {
-	if (screen == 1) {
-		switch (key) {
-		case GLUT_KEY_LEFT:
-			if (agentBack == false)
-				updateAgent(-20, 0);
-			else
-				updateAgentBack(-20, 0);
-			break;
-		case GLUT_KEY_RIGHT:
-			if (agentBack == false)
-				updateAgent(20, 0);
-			else
-				updateAgentBack(20, 0);
-			break;
-		case GLUT_KEY_UP:
-			if (agentBack == false)
-				updateAgent(0, 25);
-			break;
-		case GLUT_KEY_DOWN:
-			if (agentBack == true)
-				updateAgentBack(0, -25);
-			break;
+	if (collide == false) {
+		if (screen == 1) {
+			switch (key) {
+			case GLUT_KEY_LEFT:
+				if (agentBack == false) {
+					updateAgent(-20, 0);
+				}
+				else {
+					updateAgentBack(-20, 0);
+				}
+				break;
+			case GLUT_KEY_RIGHT:
+				if (agentBack == false) {
+					updateAgent(20, 0);
+				}
+				else {
+					updateAgentBack(20, 0);
+				}
+				break;
+			case GLUT_KEY_UP:
+				if (agentBack == false) {
+					updateAgent(0, 25);
+					score = score + 1;
+				}
+				break;
+			case GLUT_KEY_DOWN:
+				if (agentBack == true) {
+					updateAgentBack(0, -25);
+					score = score + 1;
+				}
+				break;
+			}
+			for (int i = 0; i < 10; i++) {
+				if (agentX + 25 >= coin_list[i].coinx & agentX + 25 <= coin_list[i].coinx + coin_list[i].coinSizex & agentY + 20 >= coin_list[i].coiny & agentY + 20 <= coin_list[i].coiny + coin_list[i].coinSizex) {
+					coin_list[i].coinx = -50;
+					coin_list[i].coiny = -50;
+					score = score + coin_list[i].coinSizex;
+				}
+				else if (agentX >= coin_list[i].coinx & agentX <= coin_list[i].coinx + coin_list[i].coinSizex & agentY + 20 >= coin_list[i].coiny & agentY + 20 <= coin_list[i].coiny + coin_list[i].coinSizex){
+					coin_list[i].coinx = -50;
+					coin_list[i].coiny = -50;
+					score = score + coin_list[i].coinSizex;
+				}
+			}
+			glutPostRedisplay();
 		}
-		glutPostRedisplay();
 	}
 	if (screen == 0) {
 		cout << "loll";
 		glutPostRedisplay();
 	}
-}
-void display()
-{
-    glClear(GL_COLOR_BUFFER_BIT);
-    score = score + 1;
-    glColor3f(1,1,1);
-    drawText("Score:", 360,455);
-    itoa (score, buffer, 10);
-    drawTextNum(buffer, 6, 420,455);
-    glutSwapBuffers(); 
-    for(q = 0; q<= 10000000; q++){;}
-    if(collide == true)
-    {
-        glColor3f(0,0,0);
-        drawText("Game Over", 200,250);
-        glutSwapBuffers();
-        getchar();   
- }
-
 }
 void drawSafePoint(int x, int y, int z, int w) {
 	glColor3f(0.0, 1.0, 0.0);
@@ -524,7 +529,9 @@ void updateVehicles(int i) {
 				allCarsx[i] = allCarsx[i] + speeds[i];
 			else
 				allCarsx[i] = allCarsx[i] - speeds[i];
-			if (agentX + 12.5 >= allCarsx[i] & agentX + 12.5 <= allCarsx[i] + 42 & agentY + 12.5 >= allCarsy[i] & agentY + 12.5 <= allCarsy[i] + 20)
+			if (agentX + 25 >= allCarsx[i] & agentX + 25 <= allCarsx[i] + 42 & agentY + 20 >= allCarsy[i] & agentY + 20 <= allCarsy[i] + 20)
+				collide = true;
+			else if (agentX >= allCarsx[i] & agentX <= allCarsx[i] + 42 & agentY + 20 >= allCarsy[i] & agentY + 20 <= allCarsy[i] + 20)
 				collide = true;
 
 		}
@@ -534,7 +541,9 @@ void updateVehicles(int i) {
 				allTrucksx[i] = allTrucksx[i] + speeds[i];
 			else
 				allTrucksx[i] = allTrucksx[i] - speeds[i];
-			if (agentX + 12.5 >= allTrucksx[i] & agentX + 12.5 <= allTrucksx[i] + 62 & agentY + 12.5 >= allTrucksy[i] & agentY + 12.5 <= allTrucksy[i] + 20)
+			if (agentX + 25 >= allTrucksx[i] & agentX + 25<= allTrucksx[i] + 62 & agentY + 20 >= allTrucksy[i] & agentY + 20 <= allTrucksy[i] + 20)
+				collide = true;
+			else if (agentX  >= allTrucksx[i] & agentX <= allTrucksx[i] + 62 & agentY + 20 >= allTrucksy[i] & agentY + 20 <= allTrucksy[i] + 20)
 				collide = true;
 		}
 		glutTimerFunc(100, updateVehicles, 1);
@@ -581,8 +590,14 @@ void myDisplay() {
 	drawCoin();
 	drawVehicle();
 	drawTruck();
-	glColor3f(1, 0, 1);
+	glColor4f(1, 0, 0,0.5);
 	if (collide == true) {
+		glBegin(GL_QUADS);
+		glVertex2f(125, 200);
+		glVertex2f(125,400);
+		glVertex2f(375, 400);
+		glVertex2f(375, 200);
+		glEnd();
 		drawText("Game over! Score:", 250, 250);
 		itoa(score, buffer, 10);
 		drawTextNum(buffer, 6, 250, 220);
