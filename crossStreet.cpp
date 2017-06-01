@@ -22,10 +22,11 @@ int counter = 0;
 std::vector<string> names(1);
 bool roadway[18] { true,true,false,false,true,false,false,true,true,false,false,true,false,true,false,true,false,true }; //true>right false>left 
 int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
-int speeds[18] = { 6,4,5,10,4,7,2,7,8,7,10,9,5,4,6,5,8,7 };
+int speeds[18] = { 6,4,5,10,4,7,5,7,8,7,10,9,5,4,6,5,8,7 };
 bool isdraw = false;
 bool debug = false;
 bool pause = false;
+bool hard = false;
 
 std::vector<int> allCarsx;
 std::vector<int> allCarsy;
@@ -161,6 +162,10 @@ void OnMouseClick(int button, int state, int x, int y) {
 		cout << " ";
 		cout << y;
 		if (button == GLUT_LEFT_BUTTON & x > 200 & x < 300 & y>400 & y < 440) {
+			screen = 1;
+		}
+		else if (button == GLUT_LEFT_BUTTON & x > 200 & x < 300 & y>350 & y < 390) {
+			hard = true;
 			screen = 1;
 		}
 	}
@@ -443,53 +448,100 @@ void drawTruck() {
 	float truckx;
 	float trucky;
 	int num = allTrucksy.size();
-
 	for (int m = 0; m < num; m++) {
 		truckx = allTrucksx[m];
 		trucky = allTrucksy[m];
-		glColor3f(0.545, 0.271, 0.075);
-		glBegin(GL_QUADS);
-		glVertex2f(truckx, trucky);
-		glVertex2f(truckx, trucky + 20);
-		glVertex2f(truckx + 44, trucky + 20);
-		glVertex2f(truckx + 44, trucky);
-		glEnd();
-		glBegin(GL_QUADS);
-		glVertex2f(truckx + 45, trucky);
-		glVertex2f(truckx + 45, trucky + 17);
-		glVertex2f(truckx + 62, trucky + 17);
-		glVertex2f(truckx + 62, trucky);
-		glEnd();
-		int i;
-		int triangleAmount = 20;
-		GLfloat twicePi = 2.0f * 3.1415;
-		glColor3f(0, 0, 0);
-		glBegin(GL_TRIANGLE_FAN);
-		glVertex2f(truckx + 8, trucky); // center of circle
-		for (i = 0; i <= triangleAmount; i++) {
-			glVertex2f(
-				truckx + 8 + (3 * cos(i *  twicePi / triangleAmount)),
-				trucky + (3 * sin(i * twicePi / triangleAmount))
-			);
+		if (allTrucksy[m] == 76 || allTrucksy[m] == 126 || allTrucksy[m] == 176 || allTrucksy[m] == 201 || allTrucksy[m] == 301 || allTrucksy[m] == 326 ||
+			allTrucksy[m] == 401 || allTrucksy[m] == 451 || allTrucksy[m] == 526) {
+			glColor3f(0.545, 0.271, 0.075);
+			glBegin(GL_QUADS);
+			glVertex2f(truckx , trucky);
+			glVertex2f(truckx, trucky + 17);
+			glVertex2f(truckx + 17, trucky + 17);
+			glVertex2f(truckx + 17, trucky);
+			glEnd();
+			glBegin(GL_QUADS);
+			glVertex2f(truckx+18, trucky);
+			glVertex2f(truckx+18, trucky + 20);
+			glVertex2f(truckx + 62, trucky + 20);
+			glVertex2f(truckx + 62, trucky);
+			glEnd();
+			int i;
+			int triangleAmount = 20;
+			GLfloat twicePi = 2.0f * 3.1415;
+			glColor3f(0, 0, 0);
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(truckx + 54, trucky); // center of circle
+			for (i = 0; i <= triangleAmount; i++) {
+				glVertex2f(
+					truckx + 54 + (3 * cos(i *  twicePi / triangleAmount)),
+					trucky + (3 * sin(i * twicePi / triangleAmount))
+				);
+			}
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(truckx + 47, trucky); // center of circle
+			for (i = 0; i <= triangleAmount; i++) {
+				glVertex2f(
+					truckx + 47 + (3 * cos(i *  twicePi / triangleAmount)),
+					trucky + (3 * sin(i * twicePi / triangleAmount))
+				);
+			}
+			glEnd();
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(truckx + 17, trucky); // center of circle
+			for (i = 0; i <= triangleAmount; i++) {
+				glVertex2f(
+					truckx + 17 + (3 * cos(i *  twicePi / triangleAmount)),
+					trucky + (3 * sin(i * twicePi / triangleAmount))
+				);
+			}
+			glEnd();
 		}
-		glBegin(GL_TRIANGLE_FAN);
-		glVertex2f(truckx + 15, trucky); // center of circle
-		for (i = 0; i <= triangleAmount; i++) {
-			glVertex2f(
-				truckx + 15 + (3 * cos(i *  twicePi / triangleAmount)),
-				trucky + (3 * sin(i * twicePi / triangleAmount))
-			);
+		else {
+			glColor3f(0.545, 0.271, 0.075);
+			glBegin(GL_QUADS);
+			glVertex2f(truckx, trucky);
+			glVertex2f(truckx, trucky + 20);
+			glVertex2f(truckx + 44, trucky + 20);
+			glVertex2f(truckx + 44, trucky);
+			glEnd();
+			glBegin(GL_QUADS);
+			glVertex2f(truckx + 45, trucky);
+			glVertex2f(truckx + 45, trucky + 17);
+			glVertex2f(truckx + 62, trucky + 17);
+			glVertex2f(truckx + 62, trucky);
+			glEnd();
+			int i;
+			int triangleAmount = 20;
+			GLfloat twicePi = 2.0f * 3.1415;
+			glColor3f(0, 0, 0);
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(truckx + 8, trucky); // center of circle
+			for (i = 0; i <= triangleAmount; i++) {
+				glVertex2f(
+					truckx + 8 + (3 * cos(i *  twicePi / triangleAmount)),
+					trucky + (3 * sin(i * twicePi / triangleAmount))
+				);
+			}
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(truckx + 15, trucky); // center of circle
+			for (i = 0; i <= triangleAmount; i++) {
+				glVertex2f(
+					truckx + 15 + (3 * cos(i *  twicePi / triangleAmount)),
+					trucky + (3 * sin(i * twicePi / triangleAmount))
+				);
+			}
+			glEnd();
+			glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(truckx + 45, trucky); // center of circle
+			for (i = 0; i <= triangleAmount; i++) {
+				glVertex2f(
+					truckx + 45 + (3 * cos(i *  twicePi / triangleAmount)),
+					trucky + (3 * sin(i * twicePi / triangleAmount))
+				);
+			}
+			glEnd();
 		}
-		glEnd();
-		glBegin(GL_TRIANGLE_FAN);
-		glVertex2f(truckx + 45, trucky); // center of circle
-		for (i = 0; i <= triangleAmount; i++) {
-			glVertex2f(
-				truckx + 45 + (3 * cos(i *  twicePi / triangleAmount)),
-				trucky + (3 * sin(i * twicePi / triangleAmount))
-			);
-		}
-		glEnd();
 	}
 }
 void createCar(int x, int y) {
@@ -551,7 +603,11 @@ void updateVehicles(int i) {
 				if (allTrucksy[m] == roads[i])
 					carNum++;
 			}
-			int goddamnit = 0 + (rand() % (int)(1000 - 0 + 1));
+			int goddamnit = 0;
+			if( hard = true)
+				goddamnit = 0 + (rand() % (int)(1000 - 0 + 1));
+			else
+				goddamnit = 0 + (rand() % (int)(100 - 0 + 1));
 			if (goddamnit <= 10) {
 				int rando = 0 + (rand() % (int)(3 - 0 + 1));
 				if (rando == 1 || rando == 2) {
@@ -572,10 +628,16 @@ void updateVehicles(int i) {
 			int num = allCarsy.size();
 			for (int y = 0; y < num; y++) {
 				if (roadway[i] == true & allCarsy[y]==roads[i]) {
-					allCarsx[y] = allCarsx[y] + speeds[i];
+					if(hard==false)
+						allCarsx[y] = allCarsx[y] + speeds[i];
+					else
+						allCarsx[y] = allCarsx[y] + (speeds[i]*5);
 				}
 				else if (roadway[i] == false & allCarsy[y] == roads[i]) {
-					allCarsx[y] = allCarsx[y] - speeds[i];
+					if (hard == false)
+						allCarsx[y] = allCarsx[y] - speeds[i];
+					else
+						allCarsx[y] = allCarsx[y] - (speeds[i]*5);
 				}
 				if (agentX + 25 >= allCarsx[y] & agentX + 25 <= allCarsx[y] + 42 & agentY + 20 >= allCarsy[y] & agentY + 20 <= allCarsy[y] + 20)
 					collide = true;
@@ -586,9 +648,15 @@ void updateVehicles(int i) {
 			int num2 = allTrucksy.size();
 			for (int d = 0; d < num2; d++) {
 				if (roadway[i]==true & allTrucksy[d]==roads[i])
-					allTrucksx[d] = allTrucksx[d] + speeds[i];
+					if(hard==false)
+						allTrucksx[d] = allTrucksx[d] + speeds[i];
+					else
+						allTrucksx[d] = allTrucksx[d] + (speeds[i]*5);
 				else if(roadway[i] == false & allTrucksy[d] == roads[i])
-					allTrucksx[d] = allTrucksx[d] - speeds[i];
+					if(hard==false)
+						allTrucksx[d] = allTrucksx[d] - speeds[i];
+					else
+						allTrucksx[d] = allTrucksx[d] - (speeds[i]*5);
 				if (agentX + 25 >= allTrucksx[d] & agentX + 25 <= allTrucksx[d] + 62 & agentY + 20 >= allTrucksy[d] & agentY + 20 <= allTrucksy[d] + 20)
 					collide = true;
 				else if (agentX >= allTrucksx[d] & agentX <= allTrucksx[d] + 62 & agentY + 20 >= allTrucksy[d] & agentY + 20 <= allTrucksy[d] + 20)
