@@ -22,8 +22,10 @@ int counter = 0;
 std::vector<string> names(1);
 bool roadway[18] { true,true,false,false,true,false,false,true,true,false,false,true,false,true,false,true,false,true }; //true>right false>left 
 int roads[18] = { 26,51,76,126,151,176,201,251,276,301,326,376,401,426,451,501,526,551 };
-int speeds[18] = { 2,4,5,10,4,3,2,7,2,7,10,9,5,3,6,4,1,2 };
+int speeds[18] = { 6,4,5,10,4,7,2,7,8,7,10,9,5,4,6,5,8,7 };
 bool isdraw = false;
+bool debug = false;
+bool pause = false;
 
 std::vector<int> allCarsx;
 std::vector<int> allCarsy;
@@ -152,6 +154,7 @@ void updateAgentBack(int x, int y) {
 		agentBack = false;
 }
 void OnMouseClick(int button, int state, int x, int y) {
+	
 	if (screen == 0) {
 		y = 600 - y;
 		cout << x;
@@ -160,6 +163,19 @@ void OnMouseClick(int button, int state, int x, int y) {
 		if (button == GLUT_LEFT_BUTTON & x > 200 & x < 300 & y>400 & y < 440) {
 			screen = 1;
 		}
+	}
+	if (screen == 1) {
+		if (pause == true) {		
+			cout << "dene";
+			if (button == GLUT_LEFT_BUTTON)
+				pause = false;
+		}
+		else
+			pause = true;
+		
+		//else if (button == GLUT_RIGHT_BUTTON) {
+			//debug = true;
+		//}
 	}
 }
 void keyboard(unsigned char key,int x, int y) {
@@ -184,51 +200,60 @@ void keyboard(unsigned char key,int x, int y) {
 }
 void Specialkey(int key, int x, int y)//allow to use navigation key for movement of car
 {
-	if (collide == false) {
-		if (screen == 1) {
-			switch (key) {
-			case GLUT_KEY_LEFT:
-				if (agentBack == false) {
-					updateAgent(-20, 0);
+	if (pause) {
+
+	}
+	else {
+		if (collide == false) {
+			if (screen == 1) {
+				switch (key) {
+
+				case 113: // 'Q' key for escape
+					exit(0);
+					break;
+				case GLUT_KEY_LEFT:
+					if (agentBack == false) {
+						updateAgent(-20, 0);
+					}
+					else {
+						updateAgentBack(-20, 0);
+					}
+					break;
+				case GLUT_KEY_RIGHT:
+					if (agentBack == false) {
+						updateAgent(20, 0);
+					}
+					else {
+						updateAgentBack(20, 0);
+					}
+					break;
+				case GLUT_KEY_UP:
+					if (agentBack == false) {
+						updateAgent(0, 25);
+						score = score + 1;
+					}
+					break;
+				case GLUT_KEY_DOWN:
+					if (agentBack == true) {
+						updateAgentBack(0, -25);
+						score = score + 1;
+					}
+					break;
 				}
-				else {
-					updateAgentBack(-20, 0);
+				for (int i = 0; i < 10; i++) {
+					if (agentX + 25 >= coin_list[i].coinx & agentX + 25 <= coin_list[i].coinx + coin_list[i].coinSizex & agentY + 20 >= coin_list[i].coiny & agentY + 20 <= coin_list[i].coiny + coin_list[i].coinSizex) {
+						coin_list[i].coinx = -50;
+						coin_list[i].coiny = -50;
+						score = score + coin_list[i].coinSizex;
+					}
+					else if (agentX >= coin_list[i].coinx & agentX <= coin_list[i].coinx + coin_list[i].coinSizex & agentY + 20 >= coin_list[i].coiny & agentY + 20 <= coin_list[i].coiny + coin_list[i].coinSizex) {
+						coin_list[i].coinx = -50;
+						coin_list[i].coiny = -50;
+						score = score + coin_list[i].coinSizex;
+					}
 				}
-				break;
-			case GLUT_KEY_RIGHT:
-				if (agentBack == false) {
-					updateAgent(20, 0);
-				}
-				else {
-					updateAgentBack(20, 0);
-				}
-				break;
-			case GLUT_KEY_UP:
-				if (agentBack == false) {
-					updateAgent(0, 25);
-					score = score + 1;
-				}
-				break;
-			case GLUT_KEY_DOWN:
-				if (agentBack == true) {
-					updateAgentBack(0, -25);
-					score = score + 1;
-				}
-				break;
+				glutPostRedisplay();
 			}
-			for (int i = 0; i < 10; i++) {
-				if (agentX + 25 >= coin_list[i].coinx & agentX + 25 <= coin_list[i].coinx + coin_list[i].coinSizex & agentY + 20 >= coin_list[i].coiny & agentY + 20 <= coin_list[i].coiny + coin_list[i].coinSizex) {
-					coin_list[i].coinx = -50;
-					coin_list[i].coiny = -50;
-					score = score + coin_list[i].coinSizex;
-				}
-				else if (agentX >= coin_list[i].coinx & agentX <= coin_list[i].coinx + coin_list[i].coinSizex & agentY + 20 >= coin_list[i].coiny & agentY + 20 <= coin_list[i].coiny + coin_list[i].coinSizex){
-					coin_list[i].coinx = -50;
-					coin_list[i].coiny = -50;
-					score = score + coin_list[i].coinSizex;
-				}
-			}
-			glutPostRedisplay();
 		}
 	}
 	if (screen == 0) {
@@ -476,7 +501,7 @@ void createTruck(int x, int y) {
 	allTrucksx.push_back(x);
 }
 void updateVehicles(int i) {
-	if (collide == true) {
+	if (collide == true|| pause ==true) {
 
 	}
 	else {
@@ -484,28 +509,50 @@ void updateVehicles(int i) {
 		bool busy = false;
 		bool busyright = false;
 		for (int i = 0; i < 18; i++) {
+			carNum = 0;
+
 			//cout << allCarsx.size();
 			//cout << " m ";
 			int length = allCarsy.size();
 			allCarsy.resize(length);
-			for (int i = 0; i < length; i++) {
-				if (roadway[i] & allCarsx[i] <= 40 & allCarsx[i] >= -20)
+			int length2 = allTrucksx.size();
+			allTrucksx.resize(length2);
+			for (int j = 0; j < length; j++) {
+				if (roadway[i] & allCarsx[j] <= 40 & allCarsx[j] >= -20)
 					busy = true;
-				else if (roadway[i] != true & allCarsx[i] >= 470 & allCarsx[i] <= 520)
+				else if (roadway[i] != true & allCarsx[j] >= 470 & allCarsx[j] <= 520)
+					busyright = true;
+			}
+			for (int k = 0; k < length2; k++) {
+				if (roadway[i] & allTrucksx[k] <= 40 & allTrucksx[k] >= -20)
+					busy = true;
+				else if (roadway[i] != true & allTrucksx[k] >= 470 & allTrucksx[k] <= 520)
 					busyright = true;
 			}
 			for (int m = 0; m < length; m++) {
-				if (roadway[m]) {
-					if (allCarsx[m] >= 500 & !busy)
+				if (roadway[i]==true) {
+					if (allCarsy[m]==roads[i] & allCarsx[m] >= 500 & !busy)
 						allCarsx[m] = -20;
 				}
 				else
-					if (allCarsx[m] <= 0 & !busyright)
+					if (allCarsy[m] == roads[i] & allCarsx[m] <= 0 & !busyright)
 						allCarsx[m] = 520;
 				if (allCarsy[m] == roads[i])
 					carNum++;
 			}
-			if (carNum <= 2) {
+			for (int m = 0; m < length2; m++) {
+				if (roadway[i] == true) {
+					if (allTrucksy[m] == roads[i] & allTrucksx[m] >= 500 & !busy)
+						allTrucksx[m] = -20;
+				}
+				else
+					if (allTrucksy[m] == roads[i] & allTrucksx[m] <= 0 & !busyright)
+						allTrucksx[m] = 520;
+				if (allTrucksy[m] == roads[i])
+					carNum++;
+			}
+			int goddamnit = 0 + (rand() % (int)(1000 - 0 + 1));
+			if (goddamnit <= 10) {
 				int rando = 0 + (rand() % (int)(3 - 0 + 1));
 				if (rando == 1 || rando == 2) {
 					if (roadway[i]) {
@@ -522,31 +569,34 @@ void updateVehicles(int i) {
 						createTruck(520, roads[i]);
 				}
 			}
-		}
-		int num = allCarsy.size();
-		for (int i = 0; i < num; i++) {
-			if (roadway[i])
-				allCarsx[i] = allCarsx[i] + speeds[i];
-			else
-				allCarsx[i] = allCarsx[i] - speeds[i];
-			if (agentX + 25 >= allCarsx[i] & agentX + 25 <= allCarsx[i] + 42 & agentY + 20 >= allCarsy[i] & agentY + 20 <= allCarsy[i] + 20)
-				collide = true;
-			else if (agentX >= allCarsx[i] & agentX <= allCarsx[i] + 42 & agentY + 20 >= allCarsy[i] & agentY + 20 <= allCarsy[i] + 20)
-				collide = true;
+			int num = allCarsy.size();
+			for (int y = 0; y < num; y++) {
+				if (roadway[i] == true & allCarsy[y]==roads[i]) {
+					allCarsx[y] = allCarsx[y] + speeds[i];
+				}
+				else if (roadway[i] == false & allCarsy[y] == roads[i]) {
+					allCarsx[y] = allCarsx[y] - speeds[i];
+				}
+				if (agentX + 25 >= allCarsx[y] & agentX + 25 <= allCarsx[y] + 42 & agentY + 20 >= allCarsy[y] & agentY + 20 <= allCarsy[y] + 20)
+					collide = true;
+				else if (agentX >= allCarsx[y] & agentX <= allCarsx[y] + 42 & agentY + 20 >= allCarsy[y] & agentY + 20 <= allCarsy[y] + 20)
+					collide = true;
 
+			}
+			int num2 = allTrucksy.size();
+			for (int d = 0; d < num2; d++) {
+				if (roadway[i]==true & allTrucksy[d]==roads[i])
+					allTrucksx[d] = allTrucksx[d] + speeds[i];
+				else if(roadway[i] == false & allTrucksy[d] == roads[i])
+					allTrucksx[d] = allTrucksx[d] - speeds[i];
+				if (agentX + 25 >= allTrucksx[d] & agentX + 25 <= allTrucksx[d] + 62 & agentY + 20 >= allTrucksy[d] & agentY + 20 <= allTrucksy[d] + 20)
+					collide = true;
+				else if (agentX >= allTrucksx[d] & agentX <= allTrucksx[d] + 62 & agentY + 20 >= allTrucksy[d] & agentY + 20 <= allTrucksy[d] + 20)
+					collide = true;
+			}
 		}
-		int num2 = allTrucksy.size();
-		for (int i = 0; i < num2; i++) {
-			if (roadway[i])
-				allTrucksx[i] = allTrucksx[i] + speeds[i];
-			else
-				allTrucksx[i] = allTrucksx[i] - speeds[i];
-			if (agentX + 25 >= allTrucksx[i] & agentX + 25<= allTrucksx[i] + 62 & agentY + 20 >= allTrucksy[i] & agentY + 20 <= allTrucksy[i] + 20)
-				collide = true;
-			else if (agentX  >= allTrucksx[i] & agentX <= allTrucksx[i] + 62 & agentY + 20 >= allTrucksy[i] & agentY + 20 <= allTrucksy[i] + 20)
-				collide = true;
-		}
-		glutTimerFunc(100, updateVehicles, 1);
+		
+		glutTimerFunc(100, updateVehicles, 0);
 	}
 }
 void myTimer(int value) {
@@ -592,15 +642,15 @@ void myDisplay() {
 	drawTruck();
 	glColor4f(1, 0, 0,0.5);
 	if (collide == true) {
-		glBegin(GL_QUADS);
-		glVertex2f(125, 200);
-		glVertex2f(125,400);
-		glVertex2f(375, 400);
-		glVertex2f(375, 200);
-		glEnd();
-		drawText("Game over! Score:", 250, 250);
+		//glBegin(GL_QUADS);
+		//glVertex2f(125, 200);
+		//glVertex2f(125,400);
+		//glVertex2f(375, 400);
+		//glVertex2f(375, 200);
+		//glEnd();
+		drawText("Game over! Score:", 200, 300);
 		itoa(score, buffer, 10);
-		drawTextNum(buffer, 6, 250, 220);
+		drawTextNum(buffer, 6, 200, 250);
 	}
 	drawText("Score:", 360, 575);
 	itoa(score, buffer, 10);
@@ -661,6 +711,7 @@ void homeScreen() {
 			coinInit();
 			glutTimerFunc(20000, myTimer, 1);
 			glutTimerFunc(100, updateVehicles, 0);
+			glutMouseFunc(OnMouseClick); 
 			glutDisplayFunc(myDisplay);
 			glutSpecialFunc(Specialkey);
 			glutIdleFunc(myDisplay);
